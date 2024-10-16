@@ -1,0 +1,132 @@
+/***********************/
+/* Aluno1: Vitor Soares Campos  - Nº de matrícula: 8162259          */
+/* Aluno2: Gustavo Luiz Famelli  - Nº de matrícula: 8161335         */
+/* Exercício-Programa 1 — Caixa Eletrônico                           */
+/* Programação Avançada - 2024 - Professor: Bruno Perillo            */
+/* Compilador: online compiler and debugger for c/c++                */
+/***********************/
+
+#include <stdio.h>
+
+// Define as cédulas disponíveis no caixa eletrônico
+const char *nm_cedulas[] = {"R$100", "R$50", "R$20", "R$10", "R$5", "R$2", "R$1"};
+#define num_cedulas 7 
+
+// Exibe a quantidade atual de cédulas no caixa
+void exibir_cedulas(int cedulas[]) {
+    int total = 0;
+    printf("\nQuantidade atual de cédulas no caixa:\n");
+    for (int i = 0; i < num_cedulas; i++) {
+        printf("Total de cédulas de %s: %d\n", nm_cedulas[i], cedulas[i]);
+        total += cedulas[i];
+    }
+    printf("Total de cédulas no caixa: %d\n\n", total);
+}
+
+// Realiza o saque
+int realizar_saque(int valor, int cedulas[]) {
+    int cedulas_disponiveis[num_cedulas] = {100, 50, 20, 10, 5, 2, 1};
+    int cedulas_necessarias[num_cedulas] = {0};
+    int valor_restante = valor;
+
+    // Distribui as cédulas para o saque
+    for (int i = 0; i < num_cedulas; i++) {
+        while (valor_restante >= cedulas_disponiveis[i] && cedulas[i] > 0) {
+            valor_restante -= cedulas_disponiveis[i];
+            cedulas_necessarias[i]++;
+            cedulas[i]--;
+        }
+    }
+
+    // Verifica se o saque foi efetuado
+    if (valor_restante == 0) {
+        printf("Saque de R$ %d efetuado com as seguintes cédulas:\n", valor);
+        for (int i = 0; i < num_cedulas; i++) {
+            if (cedulas_necessarias[i] > 0) {
+                printf("%s: %d\n", nm_cedulas[i], cedulas_necessarias[i]);
+            }
+        }
+        return 1;
+    } else {
+        // Reverte as cédulas retiradas, pois o saque não pôde ser realizado completamente
+        for (int i = 0; i < num_cedulas; i++) {
+            cedulas[i] += cedulas_necessarias[i];
+        }
+        printf("Saque de R$ %d não realizado por falta de cédulas ou combinação insuficiente.\n", valor);
+        return 0;
+    }
+}
+
+// Realiza depósitos
+void realizar_deposito(int deposito[], int cedulas[]) {
+    for (int i = 0; i < num_cedulas; i++) {
+        cedulas[i] += deposito[i];
+    }
+    printf("Depósito realizado com sucesso!\n");
+}
+
+int main() {
+    int cedulas[num_cedulas];
+    int deposito[num_cedulas];
+    int menu, valor;
+
+    // Entrada inicial das cédulas no caixa
+    printf("Digite a quantidade inicial de cédulas:\n");
+    for (int i = 0; i < num_cedulas; i++) {
+        printf("Digite a quantidade de %s: ", nm_cedulas[i]);
+        while (scanf("%d", &cedulas[i]) != 1 || cedulas[i] < 0) {
+            printf("Entrada inválida. Digite um número inteiro não negativo para %s: ", nm_cedulas[i]);
+            while(getchar() != '\n'); // Limpa o buffer de entrada
+        }
+    }
+
+    // Exibe a quantidade inicial de cédulas
+    exibir_cedulas(cedulas);
+
+    // Processamento das operações
+    while (1) {
+        printf("Digite o código da operação:\n");
+        printf("0 - Saque\n1 - Depósito\n-1 - Encerrar\n");
+        printf("Opção: ");
+        if (scanf("%d", &menu) != 1) {
+            printf("Entrada inválida. Por favor, digite um número inteiro válido.\n");
+            while(getchar() != '\n'); // Limpa o buffer de entrada
+            continue;
+        }
+
+        if (menu == -1) {
+            printf("Encerrando o programa!\n");
+            break;  // Encerra o programa
+        }
+
+        if (menu == 0) {
+            // Saque
+            printf("Digite o valor do saque: R$ ");
+            if (scanf("%d", &valor) != 1 || valor <= 0) {
+                printf("Valor inválido. Por favor, digite um valor positivo.\n");
+                while(getchar() != '\n'); // Limpa o buffer de entrada
+                continue;
+            }
+            realizar_saque(valor, cedulas);
+        } else if (menu == 1) {
+            // Depósito
+            printf("Digite as quantidades de cédulas para depósito:\n");
+            for (int i = 0; i < num_cedulas; i++) {
+                printf("Digite a quantidade de %s: ", nm_cedulas[i]);
+                while (scanf("%d", &deposito[i]) != 1 || deposito[i] < 0) {
+                    printf("Entrada inválida. Digite um número inteiro não negativo para %s: ", nm_cedulas[i]);
+                    while(getchar() != '\n'); // Limpa o buffer de entrada
+                }
+            }
+            realizar_deposito(deposito, cedulas);
+        } else {
+            printf("Operação inválida. Por favor, escolha entre 0, 1 ou -1.\n");
+            continue;
+        }
+
+        // Exibe a quantidade de cédulas no caixa após a operação
+        exibir_cedulas(cedulas);
+    }
+
+    return 0;
+}
